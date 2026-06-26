@@ -7,8 +7,7 @@ import { MiniMap } from './components/ui/MiniMap'
 import { RecenterButton } from './components/ui/RecenterButton'
 import { cars } from './data/cars'
 import { auditCarAssets } from './utils/auditAssets'
-import { rigState } from './components/grid/gridState'
-import { CONFIG } from './components/grid/gridConfig'
+import { resetRigView } from './components/grid/gridState'
 import type { CategoryFilter } from './types/car'
 
 const categoryCounts: Record<CategoryFilter, number> = {
@@ -26,10 +25,7 @@ function App() {
 
   function handleCategoryChange(category: CategoryFilter) {
     setActiveCategory(category)
-    rigState.target.set(0, 0, 0)
-    rigState.current.set(0, 0, 0)
-    rigState.zoom = CONFIG.zoomOut
-    rigState.activeId = null
+    resetRigView({ syncCurrent: true })
   }
 
   useEffect(() => {

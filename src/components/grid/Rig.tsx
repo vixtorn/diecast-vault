@@ -18,9 +18,13 @@ export function Rig({ gridW, gridH }: RigProps) {
   const hasSetInitialZoom = useRef(false)
 
   useEffect(() => {
-    if (!hasSetInitialZoom.current && rigState.zoom) {
-      perspectiveCamera.position.z = rigState.zoom
+    if (!hasSetInitialZoom.current && rigState.currentDistance) {
+      perspectiveCamera.position.z = rigState.currentDistance
       hasSetInitialZoom.current = true
+    }
+
+    if (import.meta.env.DEV) {
+      Object.assign(window, { __diecastRigState: rigState })
     }
   }, [perspectiveCamera])
 
@@ -50,10 +54,11 @@ export function Rig({ gridW, gridH }: RigProps) {
       isDown = true
       startX = event.clientX
       startY = event.clientY
-      initialRigX = rigState.target.x
-      initialRigY = rigState.target.y
+      initialRigX = rigState.targetPosition.x
+      initialRigY = rigState.targetPosition.y
       maxDragDistance = 0
       rigState.isDragging = false
+      rigState.lastPointerWasDrag = false
       canvas.style.cursor = 'grabbing'
     }
 
@@ -69,7 +74,7 @@ export function Rig({ gridW, gridH }: RigProps) {
 
       if (maxDragDistance > threshold) {
         rigState.isDragging = true
-        rigState.activeId = null
+        rigState.lastPointerWasDrag = true
       }
 
       const { x: bx, y: by, visibleHeight } = getBounds()
@@ -85,7 +90,7 @@ export function Rig({ gridW, gridH }: RigProps) {
       const maxOvershoot = 3
       rawTargetX = Math.max(-bx - maxOvershoot, Math.min(bx + maxOvershoot, rawTargetX))
       rawTargetY = Math.max(-by - maxOvershoot, Math.min(by + maxOvershoot, rawTargetY))
-      rigState.target.set(rawTargetX, rawTargetY, 0)
+      rigState.targetPosition.set(rawTargetX, rawTargetY, 0)
     }
 
     function onUp() {
@@ -94,28 +99,28 @@ export function Rig({ gridW, gridH }: RigProps) {
       }
 
       isDown = false
+      const wasDrag = rigState.lastPointerWasDrag
       rigState.isDragging = false
       canvas.style.cursor = 'grab'
 
-      if (rigState.activeId !== null) {
+      if (rigState.activeId !== null || !wasDrag) {
         return
       }
 
       const { x: bx, y: by } = getBounds()
-      const isZoomedOut = perspectiveCamera.position.z > CONFIG.zoomIn + 2
-      rigState.target.set(
-        isZoomedOut ? 0 : Math.max(-bx, Math.min(bx, rigState.target.x)),
-        isZoomedOut ? 2 : Math.max(-by, Math.min(by, rigState.target.y)),
+      rigState.targetPosition.set(
+        Math.max(-bx, Math.min(bx, rigState.targetPosition.x)),
+        Math.max(-by, Math.min(by, rigState.targetPosition.y)),
         0,
       )
     }
 
     function onWheel(event: WheelEvent) {
       event.preventDefault()
-      rigState.zoom = Math.max(CONFIG.zoomIn, Math.min(CONFIG.zoomOut, rigState.zoom + event.deltaY * 0.018))
-      if (rigState.zoom > CONFIG.zoomIn + 2) {
-        rigState.activeId = null
-      }
+      rigState.targetDistance = Math.max(
+        CONFIG.minZoom,
+        Math.min(CONFIG.zoomOut, rigState.targetDistance + event.deltaY * 0.018),
+      )
     }
 
     canvas.addEventListener('pointerdown', onDown)
@@ -135,14 +140,15 @@ export function Rig({ gridW, gridH }: RigProps) {
   }, [gl, gridH, gridW, perspectiveCamera])
 
   useFrame((_, delta) => {
-    easing.damp3(rigState.current, rigState.target, CONFIG.dampFactor, delta)
-    easing.damp(perspectiveCamera.position, 'z', rigState.zoom, CONFIG.zoomDamp, delta)
-    perspectiveCamera.position.x = rigState.current.x
-    perspectiveCamera.position.y = rigState.current.y
-    rigState.velocity.copy(rigState.current).sub(previous.current)
-    previous.current.copy(rigState.current)
+    easing.damp3(rigState.currentPosition, rigState.targetPosition, CONFIG.dampFactor, delta)
+    easing.damp(rigState, 'currentDistance', rigState.targetDistance, CONFIG.zoomDamp, delta)
+    perspectiveCamera.position.x = rigState.currentPosition.x
+    perspectiveCamera.position.y = rigState.currentPosition.y
+    perspectiveCamera.position.z = rigState.currentDistance
+    rigState.velocity.copy(rigState.currentPosition).sub(previous.current)
+    previous.current.copy(rigState.currentPosition)
 
-    const zoomFactor = Math.min(1, CONFIG.zoomIn / rigState.zoom)
+    const zoomFactor = Math.min(1, CONFIG.zoomIn / rigState.currentDistance)
     easing.damp(perspectiveCamera.rotation, 'x', rigState.velocity.y * CONFIG.tiltFactor * zoomFactor, 0.2, delta)
     easing.damp(perspectiveCamera.rotation, 'y', -rigState.velocity.x * CONFIG.tiltFactor * zoomFactor, 0.2, delta)
   })

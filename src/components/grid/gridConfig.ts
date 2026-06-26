@@ -8,6 +8,8 @@ export const DEFAULT_CONFIG = {
   clickThreshold: 5,
   dragResistance: 0.25,
   zoomIn: 12,
+  focusZoom: 7.5,
+  minZoom: 5.25,
   zoomOut: 31,
   zoomDamp: 0.25,
   focusScale: 1.5,

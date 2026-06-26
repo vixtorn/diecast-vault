@@ -47,8 +47,8 @@ export function MiniMap({ count }: MiniMapProps) {
         context.fill()
       }
 
-      const viewportX = 0.5 + rigState.current.x / Math.max(gridDimensions.width, 1)
-      const viewportY = 0.5 - rigState.current.y / Math.max(gridDimensions.height, 1)
+      const viewportX = 0.5 + rigState.currentPosition.x / Math.max(gridDimensions.width, 1)
+      const viewportY = 0.5 - rigState.currentPosition.y / Math.max(gridDimensions.height, 1)
       context.strokeStyle = 'rgba(30, 30, 28, 0.82)'
       context.lineWidth = ratio
       context.strokeRect(

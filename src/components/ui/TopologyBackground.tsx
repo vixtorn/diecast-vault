@@ -8,6 +8,7 @@ type TopologyBackgroundProps = {
   color: string
   isZoomedIn: boolean
   lineThickness: number
+  onBackgroundClick?: () => void
   opacity: number
   scale: number
   speed: number
@@ -66,6 +67,7 @@ export function TopologyBackground({
   color,
   isZoomedIn,
   lineThickness,
+  onBackgroundClick,
   opacity,
   scale,
   speed,
@@ -97,7 +99,7 @@ export function TopologyBackground({
   })
 
   return (
-    <Plane args={[90, 40]} position={[0, 0, -15]} renderOrder={-1}>
+    <Plane args={[90, 40]} onClick={onBackgroundClick} position={[0, 0, -15]} renderOrder={-1}>
       <shaderMaterial
         depthWrite={false}
         fragmentShader={fragmentShader}

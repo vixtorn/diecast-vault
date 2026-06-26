@@ -6,7 +6,7 @@ import { easing } from 'maath'
 import { useLayoutEffect, useMemo, useRef, useState } from 'react'
 import * as THREE from 'three'
 import { CONFIG } from './gridConfig'
-import { rigState } from './gridState'
+import { focusRigOnCar, rigState } from './gridState'
 import type { BasePosition } from './gridLayout'
 import type { DiecastCar } from '../../types/car'
 
@@ -113,10 +113,12 @@ export function CarTile({
       targetTransitionY = normalizedY * CONFIG.exitSpreadY
     }
 
-    const x = animatedPos.current.x + rigState.current.x
-    const y = animatedPos.current.y + rigState.current.y
-    const currentCull = CONFIG.cullDistance * (rigState.zoom / 8)
-    const isPositionVisible = Math.abs(x) < currentCull && Math.abs(y) < currentCull
+    const x = animatedPos.current.x
+    const y = animatedPos.current.y
+    const screenX = x - rigState.currentPosition.x
+    const screenY = y - rigState.currentPosition.y
+    const currentCull = CONFIG.cullDistance * (rigState.currentDistance / 8)
+    const isPositionVisible = Math.abs(screenX) < currentCull && Math.abs(screenY) < currentCull
 
     if (!gridVisible && targetTransitionOpacity < 0.01 && filterOpacity.current < 0.01) {
       ref.current.visible = false
@@ -131,15 +133,17 @@ export function CarTile({
 
     ref.current.visible = true
 
-    const isZoomedIn = rigState.zoom <= CONFIG.zoomIn + 0.5
-    const zoomRatio = isZoomedIn ? 0 : THREE.MathUtils.clamp((rigState.zoom - CONFIG.zoomIn) / (CONFIG.zoomOut - CONFIG.zoomIn), 0, 1)
+    const isZoomedIn = rigState.currentDistance <= CONFIG.zoomIn + 0.5
+    const zoomRatio = isZoomedIn
+      ? 0
+      : THREE.MathUtils.clamp((rigState.currentDistance - CONFIG.zoomIn) / (CONFIG.zoomOut - CONFIG.zoomIn), 0, 1)
     const smoothRatio = easing.cubic.inOut(zoomRatio)
-    const distSq = x * x + y * y
+    const distSq = screenX * screenX + screenY * screenY
     const dist = Math.sqrt(distSq)
     const targetCurveZ = -distSq * CONFIG.curvatureStrength * smoothRatio
     const rotationIntensity = Math.min(dist * 0.4, 2) * smoothRatio
-    const targetRotX = y * CONFIG.curvatureStrength * CONFIG.rotationStrength * rotationIntensity
-    const targetRotY = -x * CONFIG.curvatureStrength * CONFIG.rotationStrength * rotationIntensity
+    const targetRotX = screenY * CONFIG.curvatureStrength * CONFIG.rotationStrength * rotationIntensity
+    const targetRotY = -screenX * CONFIG.curvatureStrength * CONFIG.rotationStrength * rotationIntensity
     const isFocusMode = rigState.activeId !== null
     const isActive = rigState.activeId === index
     const isHovered = hovered && interactive
@@ -210,16 +214,9 @@ export function CarTile({
     }
     event.stopPropagation()
 
-    if (rigState.activeId === index) {
-      rigState.activeId = null
-    } else {
-      const isZoomedOut = rigState.zoom > CONFIG.zoomIn + 2
-      rigState.target.set(-basePos.x, -basePos.y, 0)
-      rigState.activeId = index
-      if (isZoomedOut) {
-        rigState.zoom = CONFIG.zoomIn
-      }
-    }
+    const focusPosition = new THREE.Vector3(basePos.x, basePos.y, 0)
+    ref.current?.getWorldPosition(focusPosition)
+    focusRigOnCar(index, car.id, focusPosition)
   }
 
   const textY = -(imageDims.height / 2) - 0.24

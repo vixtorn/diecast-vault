@@ -1,6 +1,6 @@
 import { X } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { rigState } from '../grid/gridState'
+import { resetRigView, rigState } from '../grid/gridState'
 
 export function CloseButton() {
   const [isActive, setIsActive] = useState(false)
@@ -23,7 +23,7 @@ export function CloseButton() {
       type="button"
       aria-label="Close selected car"
       onClick={() => {
-        rigState.activeId = null
+        resetRigView()
       }}
     >
       <X size={18} strokeWidth={2} />
