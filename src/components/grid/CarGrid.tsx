@@ -92,7 +92,7 @@ export function CarGrid({ activeCategory, cars }: CarGridProps) {
       id="vault"
       aria-label="3D die-cast car product grid"
     >
-      <Leva collapsed hidden={false} />
+      <Leva collapsed hidden />
       <Canvas
         camera={{ position: [0, 0, DEFAULT_CONFIG.zoomOut], fov: 45 }}
         dpr={[1, 2]}

@@ -12,7 +12,7 @@ export const rigState = {
 }
 
 export function getGridCols(count: number) {
-  return count === 9 ? 3 : Math.min(CONFIG.gridCols, Math.max(count, 1))
+  return count === 16 ? 4 : count === 9 ? 3 : Math.min(CONFIG.gridCols, Math.max(count, 1))
 }
 
 export function calculateGridDimensions(count: number) {
@@ -29,9 +29,5 @@ export function calculateGridDimensions(count: number) {
 }
 
 export function matchesFilter(car: DiecastCar, filter: CategoryFilter) {
-  if (filter === 'all') {
-    return Boolean(car.featured)
-  }
-
   return car.categories.includes(filter)
 }

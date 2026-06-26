@@ -14,11 +14,6 @@ export const categoryLabels: Record<CarCategory, string> = {
 
 export const categories: CategoryOption[] = [
   {
-    id: 'all',
-    label: 'All',
-    eyebrow: 'Featured vault',
-  },
-  {
     id: 'fast-furious',
     label: 'Fast & Furious',
     eyebrow: 'Movie legends',

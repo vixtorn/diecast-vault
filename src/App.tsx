@@ -11,25 +11,16 @@ import { rigState } from './components/grid/gridState'
 import { CONFIG } from './components/grid/gridConfig'
 import type { CategoryFilter } from './types/car'
 
-const featuredCars = cars
-  .filter((car) => car.featured)
-  .sort((a, b) => (a.featuredOrder ?? 99) - (b.featuredOrder ?? 99))
-
 const categoryCounts: Record<CategoryFilter, number> = {
-  all: featuredCars.length,
   'fast-furious': cars.filter((car) => car.categories.includes('fast-furious')).length,
   jdm: cars.filter((car) => car.categories.includes('jdm')).length,
   'euro-icons': cars.filter((car) => car.categories.includes('euro-icons')).length,
 }
 
 function App() {
-  const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all')
+  const [activeCategory, setActiveCategory] = useState<CategoryFilter>('fast-furious')
 
   const filteredCars = useMemo(() => {
-    if (activeCategory === 'all') {
-      return featuredCars
-    }
-
     return cars.filter((car) => car.categories.includes(activeCategory))
   }, [activeCategory])
 
