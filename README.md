@@ -2,6 +2,8 @@
 
 Diecast Vault is a Vite + React + TypeScript browsing experiment for collectible die-cast toy cars. It uses local PNG assets, typed collection data, and Framer Motion to create a full-screen visual product wall with category filtering.
 
+Live Demo: https://diecast-vault-sable.vercel.app/
+
 ## Inspiration Credit
 
 Interaction and layout inspiration: [Shoe Finder by Matthew Greenberg](https://shoe-finder-wine.vercel.app/)
