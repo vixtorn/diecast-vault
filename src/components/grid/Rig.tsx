@@ -22,10 +22,6 @@ export function Rig({ gridW, gridH }: RigProps) {
       perspectiveCamera.position.z = rigState.currentDistance
       hasSetInitialZoom.current = true
     }
-
-    if (import.meta.env.DEV) {
-      Object.assign(window, { __diecastRigState: rigState })
-    }
   }, [perspectiveCamera])
 
   function getBounds() {
@@ -79,8 +75,8 @@ export function Rig({ gridW, gridH }: RigProps) {
 
       const { x: bx, y: by, visibleHeight } = getBounds()
       const sensitivity = (visibleHeight / window.innerHeight) * CONFIG.dragSpeed
-      let rawTargetX = initialRigX + dx * sensitivity
-      let rawTargetY = initialRigY - dy * sensitivity
+      let rawTargetX = initialRigX - dx * sensitivity
+      let rawTargetY = initialRigY + dy * sensitivity
 
       if (rawTargetX > bx) rawTargetX = bx + (rawTargetX - bx) * CONFIG.dragResistance
       if (rawTargetX < -bx) rawTargetX = -bx + (rawTargetX + bx) * CONFIG.dragResistance

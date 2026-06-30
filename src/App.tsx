@@ -1,4 +1,5 @@
 ﻿import { useEffect, useMemo, useState } from 'react'
+import { VantaCloudsBackground } from './components/background/VantaCloudsBackground'
 import { CarGrid } from './components/grid/CarGrid'
 import { CategoryControls } from './components/ui/CategoryControls'
 import { CloseButton } from './components/ui/CloseButton'
@@ -34,6 +35,7 @@ function App() {
 
   return (
     <div className="app-shell">
+      <VantaCloudsBackground />
       <Header />
       <CategoryControls
         activeCategory={activeCategory}

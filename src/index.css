@@ -35,9 +35,33 @@ button {
 
 .app-shell {
   position: relative;
+  z-index: 0;
   width: 100vw;
   height: 100svh;
   overflow: hidden;
+}
+
+.vanta-clouds-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.72), transparent 34rem),
+    radial-gradient(circle at 78% 72%, rgba(214, 204, 188, 0.62), transparent 28rem),
+    #e4e0d6;
+  pointer-events: none;
+}
+
+.vanta-clouds-background canvas {
+  opacity: 0.68;
+}
+
+.vanta-clouds-background.is-fallback {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.78), transparent 34rem),
+    radial-gradient(circle at 70% 42%, rgba(239, 231, 214, 0.72), transparent 32rem),
+    linear-gradient(135deg, #ede8dd 0%, #ded7ca 100%);
 }
 
 .canvas-shell {

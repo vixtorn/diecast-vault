@@ -7,7 +7,6 @@ import { CONFIG, DEFAULT_CONFIG } from './gridConfig'
 import { calculateGridDimensions, resetRigView, rigState } from './gridState'
 import { GridCanvas } from './GridCanvas'
 import { Rig } from './Rig'
-import { TopologyBackground } from '../ui/TopologyBackground'
 import type { CategoryFilter, DiecastCar } from '../../types/car'
 
 type CarGridProps = {
@@ -86,8 +85,6 @@ export function CarGrid({ activeCategory, cars }: CarGridProps) {
   }, [activeCategory, cars])
 
   const activeDims = useMemo(() => calculateGridDimensions(cars.length), [cars.length])
-  const isZoomedIn = rigState.currentDistance <= CONFIG.zoomIn + 0.5
-
   return (
     <section
       className="canvas-shell"
@@ -100,25 +97,28 @@ export function CarGrid({ activeCategory, cars }: CarGridProps) {
         camera={{ position: [0, 0, DEFAULT_CONFIG.zoomOut], fov: 45 }}
         dpr={[1, 2]}
         gl={{
+          alpha: true,
           antialias: true,
           toneMapping: THREE.NoToneMapping,
+        }}
+        onCreated={({ gl }) => {
+          gl.setClearColor(0x000000, 0)
         }}
       >
         <ConfigBridge />
         <Rig gridH={activeDims.height} gridW={activeDims.width} />
-        <TopologyBackground
-          color={CONFIG.bgColor}
-          isZoomedIn={isZoomedIn}
-          lineThickness={CONFIG.bgLineThickness}
-          onBackgroundClick={() => {
+        <mesh
+          onClick={() => {
             if (rigState.activeId !== null && !rigState.lastPointerWasDrag) {
               resetRigView()
             }
           }}
-          opacity={CONFIG.bgOpacity}
-          scale={CONFIG.bgScale}
-          speed={CONFIG.bgSpeed}
-        />
+          position={[0, 0, -15]}
+          renderOrder={-1}
+        >
+          <planeGeometry args={[90, 40]} />
+          <meshBasicMaterial opacity={0} transparent />
+        </mesh>
         <fog attach="fog" args={['#f0f0f0', CONFIG.fogNear, CONFIG.fogFar]} />
         <Suspense fallback={null}>
           {layers.map((layer) => (
